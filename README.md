@@ -44,6 +44,8 @@ Search `index.html` for `TODO(Gregory)` and `class="todo"`:
    | AAAA | `@` | 2606:50c0:8003::153 |
    | CNAME | `www` | `crescentsoftware.github.io` |
 
+   **Route 53:** create one A record for the bare domain and paste all four IPs into the Value box, one per line (Routing policy: Simple). Do the same for one AAAA record with the four IPv6 addresses. Then add a CNAME record named `www` with the value `crescentsoftware.github.io`.
+
    If you use Cloudflare DNS, set these records to "DNS only" (grey cloud) so GitHub can issue the certificate.
 4. Repo Settings > Pages > Custom domain: `laserlarrygame.com` > Save. Wait for the DNS check to pass (minutes to a few hours), then tick **Enforce HTTPS**. `www.laserlarrygame.com` then redirects to the bare domain.
 5. Email: set up forwarding for `info@laserlarrygame.com` (the support address on the site) to your inbox. Most registrars include free email forwarding, as do Cloudflare Email Routing and ImprovMX.
