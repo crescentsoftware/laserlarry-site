@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laser Larry</title>
+<meta name="description" content="Laser Larry is a silly space shooter for iPhone and iPad. Blast through the cosmos with a pickle gun. Made in Kelowna, BC.">
+<meta name="theme-color" content="#0f1c2c">
+<meta property="og:title" content="Laser Larry: Space Shooter">
+<meta property="og:description" content="The silliest space shooter on your phone. Blast through the cosmos with a pickle gun.">
+<meta property="og:image" content="https://laserlarrygame.com/assets/img/share-card.jpg">
+<meta property="og:url" content="https://laserlarrygame.com/">
+<link rel="canonical" href="https://laserlarrygame.com/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<!-- TODO(Gregory): once the app is live, add the Smart App Banner:
+<meta name="apple-itunes-app" content="app-id=YOUR_APP_ID"> -->
+<style>
+/* Layout: one long dark "space" scroll. Hero with logo + Larry's ship, a loadout grid,
+   a parents panel, then Support and Privacy as plain readable text sections. */
+/* Aldo the Apache: the game's own display font (Assets/Media/Fonts). One weight only. */
+@font-face { font-family: "Aldo the Apache"; src: url("assets/fonts/aldo-the-apache.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "Nunito"; src: url("assets/fonts/nunito-var.woff2") format("woff2"); font-weight: 200 1000; font-display: swap; }
+
+:root {
+  color-scheme: dark;
+  --void: #0f1c2c;      /* page ground, the deep space of the game's backgrounds */
+  --deep: #172a3f;      /* section bands */
+  --panel: #1f3650;     /* loadout slots */
+  --line: #2f4a68;
+  --ink: #eef4f8;
+  --muted: #a7bccd;
+  --teal: #48c9c6;      /* the "Larry" in the logo */
+  --orange: #f7a823;    /* Larry's ship */
+  --pink: #ee4f7e;      /* the pink poly buttons */
+  --display: "Aldo the Apache", "Avenir Next Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Nunito", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--void); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--ink);
+  font: 400 1.0625rem/1.6 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--teal); text-underline-offset: 3px; }
+a:hover { color: var(--ink); }
+:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.1; text-wrap: balance; margin: 0; }
+h2 { font-size: clamp(1.9rem, 4.5vw, 2.75rem); letter-spacing: -0.01em; }
+h3 { font-size: 1.25rem; }
+p { margin: 0; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+.eyebrow { font-family: var(--display); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--orange); }
+
+/* Top bar */
+.topbar { position: absolute; inset: 0 0 auto; z-index: 2; padding-top: env(safe-area-inset-top, 0px); }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; }
+.brand { display: flex; align-items: center; gap: 0.6rem; color: var(--ink); text-decoration: none; font-family: var(--display); font-weight: 700; letter-spacing: 0.04em; }
+.brand img { width: 36px; height: 36px; border-radius: 9px; }
+.topbar nav { display: flex; gap: 1.25rem; font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+.topbar nav a { color: var(--ink); text-decoration: none; }
+.topbar nav a:hover { color: var(--teal); }
+
+/* Hero */
+.hero {
+  position: relative; overflow: hidden;
+  background: var(--void) url("assets/img/space-bg.jpg") center / cover no-repeat;
+  padding-block: calc(env(safe-area-inset-top, 0px) + 6rem) 4.5rem;
+}
+.hero::before, .hero::after { /* laser streaks borrowed from the title screen */
+  content: ""; position: absolute; height: 3px; border-radius: 3px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--orange), var(--pink));
+  transform: rotate(-22deg); opacity: 0.85;
+}
+.hero::before { width: 260px; top: 18%; left: -40px; }
+.hero::after { width: 180px; bottom: 22%; right: 8%; background: linear-gradient(90deg, transparent, var(--teal)); }
+.hero .wrap { position: relative; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2rem; align-items: center; }
+.hero-copy { display: grid; gap: 1.25rem; min-width: 0; }
+.hero-logo { width: min(340px, 80%); }
+.hero h1 { font-size: clamp(1.75rem, 4.2vw, 2.6rem); }
+.hero .lede { font-size: 1.2rem; color: var(--muted); max-width: 34ch; }
+.cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; }
+.store-btn {
+  display: inline-flex; align-items: center; gap: 0.65rem;
+  background: #000; color: #fff; text-decoration: none;
+  border: 1px solid #a6a6a6; border-radius: 10px; padding: 0.55rem 1.1rem 0.55rem 0.9rem;
+}
+.store-btn:hover { color: #fff; border-color: #fff; }
+.store-btn svg { width: 24px; height: 28px; flex: none; }
+.store-btn span { display: grid; line-height: 1.1; }
+.store-btn small { font-size: 0.7rem; }
+.store-btn strong { font-size: 1.3rem; font-weight: 600; font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; letter-spacing: -0.01em; }
+.cta-note { color: var(--muted); font-size: 0.95rem; }
+.ship-stage { position: relative; display: grid; place-items: center; min-height: 280px; }
+.ship-stage .orbit { position: absolute; width: 300px; max-width: 100%; aspect-ratio: 1; border: 2px dotted rgba(238,244,248,0.35); border-radius: 50%; }
+.ship-stage .moon { position: absolute; width: 96px; top: 4%; right: 6%; }
+.ship { width: min(230px, 80%); transform: rotate(-8deg); animation: bob 4s ease-in-out infinite; filter: drop-shadow(0 14px 22px rgba(0,0,0,0.45)); }
+@keyframes bob { 50% { transform: rotate(-5deg) translateY(-12px); } }
+@media (prefers-reduced-motion: reduce) { .ship { animation: none; } }
+
+/* Sections */
+section { padding-block: 4.5rem; }
+.band { background: var(--deep); }
+.section-head { display: grid; gap: 0.75rem; margin-bottom: 2.25rem; max-width: 46rem; }
+.section-head p { color: var(--muted); font-size: 1.1rem; }
+
+/* Loadout */
+.loadout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.slot { display: grid; grid-template-columns: 170px 1fr; gap: 1.25rem; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 1.1rem 1.25rem; }
+.slot-art { display: grid; place-items: center; height: 72px; }
+.slot-art img { max-height: 64px; width: auto; }
+.slot-body { display: grid; gap: 0.3rem; min-width: 0; }
+.slot .kind { font-family: var(--display); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.slot .kind.weapon { color: var(--pink); }
+.slot .kind.engine { color: var(--teal); }
+.slot p { color: var(--muted); font-size: 0.98rem; }
+
+/* Stages */
+.stages { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 2.5rem; align-items: center; }
+.stages img { width: min(240px, 70%); margin-inline: auto; }
+.route { list-style: none; margin: 1.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.route li { font-family: var(--display); font-weight: 600; font-size: 0.95rem; padding: 0.35rem 0.8rem; border-radius: 999px; border: 1px dashed var(--line); color: var(--ink); }
+.route li:last-child { border-color: var(--pink); color: var(--pink); }
+.stages-copy { display: grid; gap: 1rem; min-width: 0; }
+.stages-copy p { color: var(--muted); max-width: 52ch; }
+
+/* Parents */
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 2.5rem; }
+.fact { display: grid; gap: 0.35rem; padding-left: 1rem; border-left: 3px solid var(--orange); }
+.fact p { color: var(--muted); }
+
+/* Text pages (Support, Privacy) */
+.doc > * { max-width: 44rem; }
+.doc h2 { margin-bottom: 1rem; }
+.doc h3 { margin: 2rem 0 0.5rem; font-size: 1.2rem; }
+.doc p, .doc li { color: #d3dfe8; }
+.doc p + p { margin-top: 0.8rem; }
+.doc ul { padding-left: 1.2rem; margin: 0.6rem 0 0; display: grid; gap: 0.45rem; }
+.doc .meta { color: var(--muted); font-size: 0.95rem; }
+.contact-card { margin: 1.5rem 0 0.5rem; padding: 1.25rem 1.4rem; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; display: grid; gap: 0.35rem; }
+.contact-card .label { font-family: var(--display); font-weight: 600; font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--teal); }
+.contact-card a { font-size: 1.2rem; font-weight: 700; word-break: break-all; }
+.faq { margin-top: 1.5rem; display: grid; gap: 1.4rem; }
+.faq h3 { margin: 0 0 0.35rem; }
+.table-scroll { overflow-x: auto; margin-top: 1rem; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 0.95rem; }
+th, td { text-align: left; vertical-align: top; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--line); }
+th { font-family: var(--display); font-weight: 600; color: var(--ink); }
+td { color: #d3dfe8; }
+
+/* Placeholders Gregory must fill before launch. Visible on purpose. */
+.todo { background: rgba(247,168,35,0.15); outline: 1px dashed var(--orange); border-radius: 4px; padding: 0 0.25rem; color: var(--orange); }
+
+footer { padding-block: 2.5rem calc(2.5rem + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; justify-content: space-between; }
+footer nav { display: flex; gap: 1.25rem; }
+footer .legal { flex-basis: 100%; font-size: 0.8rem; opacity: 0.8; }
+
+@media (max-width: 760px) {
+  .hero { padding-block: calc(env(safe-area-inset-top, 0px) + 5rem) 3rem; }
+  .hero .wrap, .stages { grid-template-columns: 1fr; }
+  .ship-stage { min-height: 170px; }
+  .ship-stage .orbit { width: 180px; }
+  .ship-stage .moon { width: 64px; right: 18%; }
+  .ship { width: 150px; }
+  .hero-logo { width: min(260px, 75%); }
+  .stages img { width: 150px; }
+  .loadout, .facts { grid-template-columns: 1fr; }
+  .slot { grid-template-columns: 120px 1fr; gap: 1rem; }
+  .topbar nav { gap: 0.9rem; font-size: 0.9rem; }
+  .brand span { display: none; }
+  section { padding-block: 3.25rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/img/apple-touch-icon.png" alt="" width="36" height="36"><span>LASER LARRY</span></a>
+    <nav aria-label="Main">
+      <a href="#parents">Parents</a>
+      <a href="#support">Support</a>
+      <a href="#privacy">Privacy</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <img class="hero-logo" src="assets/img/logo.png" alt="Laser Larry" width="356" height="268">
+        <h1>The silliest space shooter on your phone.</h1>
+        <p class="lede">Blast through the cosmos with a pickle gun. One thumb, short levels, and a sun that really doesn't like you.</p>
+        <div class="cta-row">
+          <!-- TODO(Gregory): replace href with the App Store link (apps.apple.com/ca/app/...).
+               Before launch, swap this button for Apple's official "Download on the App Store" badge
+               from developer.apple.com/app-store/marketing/guidelines/ -->
+          <a class="store-btn" href="#" aria-label="Download Laser Larry on the App Store">
+            <svg viewBox="0 0 24 28" aria-hidden="true"><path fill="currentColor" d="M19.7 14.9c0-3 2.5-4.5 2.6-4.6-1.4-2.1-3.6-2.4-4.4-2.4-1.9-.2-3.6 1.1-4.6 1.1-.9 0-2.4-1.1-4-1-2 0-3.9 1.2-5 3-2.1 3.7-.5 9.2 1.5 12.2 1 1.5 2.2 3.1 3.8 3 1.5-.1 2.1-1 4-1 1.8 0 2.4 1 4 1 1.6 0 2.7-1.5 3.7-3 1.2-1.7 1.6-3.3 1.7-3.4-.1 0-3.3-1.2-3.3-4.9zM16.7 6c.8-1 1.4-2.4 1.2-3.8-1.2.1-2.6.8-3.5 1.8-.8.9-1.5 2.3-1.3 3.7 1.3.1 2.7-.7 3.6-1.7z"/></svg>
+            <span><small>Download on the</small><strong>App Store</strong></span>
+          </a>
+          <p class="cta-note">Free on iPhone and iPad.<br>Rated 4+.</p>
+        </div>
+      </div>
+      <div class="ship-stage" aria-hidden="true">
+        <div class="orbit"></div>
+        <img class="moon" src="assets/img/moon.png" alt="" width="210" height="210">
+        <img class="ship" src="assets/img/larry-ship.png" alt="" width="192" height="182">
+      </div>
+    </div>
+  </div>
+
+  <section class="band" aria-labelledby="loadout-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Hangar</p>
+        <h2 id="loadout-title">Gear up with the dumbest weapons in the galaxy</h2>
+        <p>Earn coins as you fly, then bolt something ridiculous onto Larry's ship.</p>
+      </div>
+      <div class="loadout">
+        <article class="slot">
+          <div class="slot-art"><img src="assets/img/weapon-pickle.png" alt="Pickle Gun" width="388" height="108"></div>
+          <div class="slot-body"><span class="kind weapon">Weapon</span><h3>Pickle Gun</h3><p>Fires briny green justice. Aliens hate pickles.</p></div>
+        </article>
+        <article class="slot">
+          <div class="slot-art"><img src="assets/img/weapon-fish.png" alt="Fish Gun" width="380" height="96"></div>
+          <div class="slot-body"><span class="kind weapon">Weapon</span><h3>Fish Gun</h3><p>A whole aquarium, aimed forward. The goldfish are fine.</p></div>
+        </article>
+        <article class="slot">
+          <div class="slot-art"><img src="assets/img/engine-cola.png" alt="Cola Engine" width="380" height="84"></div>
+          <div class="slot-body"><span class="kind engine">Engine</span><h3>Cola Engine</h3><p>Fizz-powered thrust. Do not shake before flying.</p></div>
+        </article>
+        <article class="slot">
+          <div class="slot-art"><img src="assets/img/engine-rainbow.png" alt="Rainbow Engine" width="374" height="94"></div>
+          <div class="slot-body"><span class="kind engine">Engine</span><h3>Rainbow Engine</h3><p>Leaves a trail so bright the asteroids move out of the way.</p></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stages-title">
+    <div class="wrap stages">
+      <img src="assets/img/sun-boss.png" alt="The Sun boss, a spiky angry star" width="214" height="216">
+      <div class="stages-copy">
+        <p class="eyebrow">Flight plan</p>
+        <h2 id="stages-title">Save your planet, one quick level at a time</h2>
+        <p>Each stage takes a few minutes, so it fits in a bus ride or the wait before dinner. Dodge comets, collect coins, and take on a boss at the end of the route.</p>
+        <ol class="route" aria-label="Stages">
+          <li>Moon</li><li>Planets</li><li>Asteroids</li><li>Sun</li><li>Light Speed</li><li>Black Hole</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="parents" aria-labelledby="parents-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">For parents</p>
+        <h2 id="parents-title">Silly and safe</h2>
+        <p>Here is what you should know before your kids play.</p>
+      </div>
+      <div class="facts">
+        <div class="fact"><h3>Cartoon action, no gore</h3><p>Enemies are bugs, rocks and grumpy planets. They pop. Nothing bleeds.</p></div>
+        <div class="fact"><h3>No chat, no strangers</h3><p>There is no chat and no way to message other players. Leaderboards use Game Center nicknames.</p></div>
+        <div class="fact"><h3>Purchases go through Apple</h3><p>Coin packs are optional. Turn on Ask to Buy in Family Sharing, or limit purchases in Screen Time, and your child needs your OK to buy.</p></div>
+        <div class="fact"><h3>No personal information</h3><p>We don't ask for names, emails, photos or location. Read the details in our <a href="#privacy">privacy policy</a>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="support" aria-labelledby="support-title">
+    <div class="wrap doc">
+      <p class="eyebrow">Support</p>
+      <h2 id="support-title">Need help?</h2>
+      <p>Found a bug, lost your coins, or have an idea? Email us and a real person will answer, usually within two business days.</p>
+      <div class="contact-card">
+        <span class="label">Email</span>
+        <a href="mailto:info@laserlarrygame.com">info@laserlarrygame.com</a>
+        <p class="meta">Please include your device model, iOS version, and what happened. A screenshot helps a lot.</p>
+      </div>
+
+      <div class="faq">
+        <div>
+          <h3>I bought coins but they didn't show up.</h3>
+          <p>Close the game completely and open it again, with an internet connection. The game finishes any interrupted purchase when it starts. Still missing? Email us with the date of the purchase from your Apple receipt.</p>
+        </div>
+        <div>
+          <h3>How do I get a refund?</h3>
+          <p>Apple handles all payments, so refunds are requested from Apple at <a href="https://reportaproblem.apple.com" rel="noopener">reportaproblem.apple.com</a>.</p>
+        </div>
+        <div>
+          <h3>Will I lose my progress if I get a new phone?</h3>
+          <p>Progress and coins are saved on your device, so they don't move to a new phone. Purchases that unlock something for good can be brought back with Restore Purchases in the game's store, on any device signed in to the same Apple Account.</p>
+        </div>
+        <div>
+          <h3>How do I stop my child from buying things?</h3>
+          <p>Use Ask to Buy in Family Sharing, or go to Settings, Screen Time, Content &amp; Privacy Restrictions, and set In-app Purchases to Don't Allow.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="privacy" aria-labelledby="privacy-title">
+    <div class="wrap doc">
+      <p class="eyebrow">Privacy policy</p>
+      <h2 id="privacy-title">Privacy Policy</h2>
+      <!-- TODO(Gregory): set the effective date when you publish -->
+      <p class="meta">Effective <span class="todo">[date]</span>. Applies to the Laser Larry app and this website.</p>
+
+      <p>Laser Larry is made by Crescent Software in Kelowna, British Columbia, Canada ("we", "us"). Kids play Laser Larry, so we keep the data we collect to the minimum the game needs to work and to fix crashes. We do not sell personal information, and we do not ask players for their name, email address, phone number, photos, contacts or location.</p>
+
+      <h3>What the app collects</h3>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Data</th><th>Why</th><th>Who handles it</th></tr></thead>
+          <tbody>
+            <tr><td>Game progress, coins and settings</td><td>To save your game</td><td>Stored on your device only</td></tr>
+            <tr><td>Crash reports: device model, iOS version, app version, what the game was doing, and a random install ID</td><td>To find and fix bugs</td><td>Sentry (crash reporting)</td></tr>
+            <tr><td>Gameplay events, such as levels started and finished, with a random ID</td><td>To learn which levels are too hard or too easy</td><td>Unity Analytics</td></tr>
+            <tr><td>Ad requests and a device-level advertising signal where allowed</td><td>To show ads that keep the game free</td><td>Unity Ads</td></tr>
+            <tr><td>Purchase receipts</td><td>To deliver and restore coin packs</td><td>Apple (we never see your payment details)</td></tr>
+            <tr><td>Game Center nickname and scores</td><td>For leaderboards, if you sign in to Game Center</td><td>Apple</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:1rem">The random install ID is created when the game is first opened. It is not linked to your name, your Apple Account, or your advertising ID, and it is deleted when you delete the app. Crash reports are set up to strip IP addresses and other personal data before they are sent.</p>
+
+      <h3>Children</h3>
+      <p>Laser Larry is made for a general audience that includes children under 13. For every player, we do not collect personal information as defined by the US Children's Online Privacy Protection Act (COPPA) or Canada's PIPEDA. We tell our ad and analytics partners to treat the app as child-directed where a player may be a child, which means ads are not personalized and are not based on what the player does in other apps. <!-- TODO(Gregory): confirm this matches the Unity Ads / Analytics settings shipped in 2.0 (#92) --></p>
+      <p>If you are a parent and believe your child has sent us personal information, for example in a support email, contact us and we will delete it.</p>
+
+      <h3>Ads and tracking</h3>
+      <p>The game may show ads from Unity Ads, including optional videos you can watch for a reward. We do not track players across other companies' apps or websites. If the game ever asks for permission to track on iOS, you can say no and the game works the same. You can also turn off tracking for all apps in Settings, Privacy &amp; Security, Tracking.</p>
+
+      <h3>Service providers</h3>
+      <p>We use these companies to run the game. Each has its own privacy policy:</p>
+      <ul>
+        <li>Apple, for the App Store, in-app purchases and Game Center: <a href="https://www.apple.com/legal/privacy/" rel="noopener">apple.com/legal/privacy</a></li>
+        <li>Unity, for ads and analytics: <a href="https://unity.com/legal/game-player-and-app-user-privacy-policy" rel="noopener">unity.com/legal/game-player-and-app-user-privacy-policy</a></li>
+        <li>Sentry, for crash reports: <a href="https://sentry.io/privacy/" rel="noopener">sentry.io/privacy</a></li>
+      </ul>
+      <p style="margin-top:0.8rem">These providers may process data outside Canada, including in the United States.</p>
+
+      <h3>How long we keep data</h3>
+      <p>Crash reports and analytics events are kept for up to 90 days and then deleted. Support emails are kept until your question is resolved and then for up to one year. <!-- TODO(Gregory): match these to the retention settings in Sentry and Unity dashboards --></p>
+
+      <h3>Your choices</h3>
+      <ul>
+        <li>Delete the app to delete your game progress and the install ID from your device.</li>
+        <li>Email us to ask what data we hold, or to have it deleted. Because we don't know who you are, we may need details such as your device model and roughly when you played to find it.</li>
+        <li>Turn off in-app purchases or tracking in iOS Screen Time and Privacy settings.</li>
+      </ul>
+
+      <h3>This website</h3>
+      <p>This website does not use cookies, analytics or trackers, and its fonts are served from this site rather than a third party. The site is hosted on GitHub Pages, which may log visitors' IP addresses for security. See <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub's privacy statement</a>.</p>
+
+      <h3>Changes</h3>
+      <p>If we change this policy, we will update the effective date above. If a change affects what we collect from players, we will say so in the app's release notes.</p>
+
+      <h3>Contact</h3>
+      <p>Crescent Software, Kelowna, British Columbia, Canada.<br>Email: <a href="mailto:info@laserlarrygame.com">info@laserlarrygame.com</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; 2026 Crescent Software &middot; Made in Kelowna, BC</span>
+    <nav aria-label="Footer">
+      <a href="#support">Support</a>
+      <a href="#privacy">Privacy Policy</a>
+    </nav>
+    <p class="legal">Apple, the Apple logo, iPhone, iPad and Game Center are trademarks of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc.</p>
+  </div>
+</footer>
+
+</body>
+</html>
